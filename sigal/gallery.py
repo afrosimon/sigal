@@ -429,6 +429,30 @@ class Album:
                 for path in self.subdirs]
 
     @property
+    def albums_per_year(self):
+        """List of :class:`~sigal.gallery.Album` objects for each
+        sub-directory, divided in sections based on the 
+        """
+        sorted_albums = {}
+        root_path = self.path if self.path != '.' else ''
+        
+        unsorted_albums = [
+            self.gallery.albums[join(root_path, path)]
+            for path in self.subdirs
+        ]
+
+        for album in unsorted_albums:
+            if 'year' in album.meta:
+                if album.meta['year'][0] in sorted_albums:
+                    sorted_albums[album.meta['year'][0]].append(album)
+                else:
+                    sorted_albums[album.meta['year'][0]] = [album]
+            else:
+                sorted_albums.setdefault('unsorted', []).append(album)
+
+        return sorted_albums
+
+    @property
     def url(self):
         """URL of the album, relative to its parent."""
         url = self.name.encode('utf-8')
