@@ -46,7 +46,11 @@ def upload_s3(gallery, settings=None):
             upload_files += [(path, size)]
 
     # Connect to specified bucket
-    conn = boto.connect_s3()
+    conn = boto.connect_s3(
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+        host=os.environ.get("AWS_ENDPOINT_URL")
+    )
     bucket = conn.get_bucket(gallery.settings['upload_s3_options']['bucket'])
 
     # Upload the files
