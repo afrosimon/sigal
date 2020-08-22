@@ -80,6 +80,11 @@ class Media:
         self.src_path = join(settings['source'], path, filename)
         self.dst_path = join(settings['destination'], path, filename)
 
+        if 's3_hostname' in settings:
+            self.hostname = settings['s3_hostname']
+        else:
+            self.hostname = None
+
         self.thumb_name = get_thumb(self.settings, self.filename)
         self.thumb_path = join(settings['destination'], path, self.thumb_name)
 
@@ -102,7 +107,11 @@ class Media:
     @property
     def url(self):
         """URL of the media."""
-        return url_from_path(self.filename)
+        # Absolute URL or relative path?
+        if self.hostname:
+            return self.hostname + self.path + '/' + self.filename
+        else:
+            return url_from_path(self.filename)
 
     @property
     def big(self):
@@ -288,6 +297,11 @@ class Album:
         else:
             self.src_path = join(settings['source'], path)
             self.dst_path = join(settings['destination'], path)
+
+        if 's3_hostname' in settings:
+            self.hostname = settings['s3_hostname']
+        else:
+            self.hostname = None
 
         self.logger = logging.getLogger(__name__)
         self._get_metadata()
@@ -486,8 +500,12 @@ class Album:
                         size = f.file_metadata['size']
 
                     if size['width'] > size['height']:
-                        self._thumbnail = (url_quote(self.name) + '/' +
-                                           f.thumbnail)
+                        if self.hostname:
+                            self._thumbnail = (self.hostname + url_quote(self.name) + '/' +
+                                               f.thumbnail)
+                        else:
+                            self._thumbnail = (url_quote(self.name) + '/' +
+                                               f.thumbnail)
                         self.logger.debug(
                             "Use 1st landscape image as thumbnail for %r : %s",
                             self, self._thumbnail)
