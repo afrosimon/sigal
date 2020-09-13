@@ -160,7 +160,11 @@ class Media:
             except Exception as e:
                 self.logger.error('Failed to generate thumbnail: %s', e)
                 return
-        return url_from_path(self.thumb_name)
+
+        if self.hostname:
+            return self.hostname + self.path + '/' + self.thumb_name
+        else:
+            return url_from_path(self.thumb_name)
 
     def _get_metadata(self):
         """Get image metadata from filename.md: title, description, meta."""
